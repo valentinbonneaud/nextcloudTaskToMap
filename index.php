@@ -97,7 +97,8 @@ class Location {
 						preg_match($re, $c, $matches);
 
 						if (count($matches) > 0) {
-							$c = "<a href=\'$matches[0]\' target=\'_blank\'>$c</a>";
+							$new = "<a href=\'$matches[1]\' target=\'_blank\'>$matches[1]</a>";
+							$c = str_replace($matches[1], $new, $c);
 						}
 						$this->note .= $c."</br>";
 					}
