@@ -57,7 +57,19 @@ class Location {
 		$this->gps = array();
 		$this->parent = "";
 
-		foreach ($data as $d) {
+		// regex to find urls
+		$re = '/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/';
+
+		for($i=0;$i<count($data);$i++){
+
+			$d = trim($data[$i]);
+
+			// we check if the next line start with a space (if yes, it is the continuation of the current line)
+			while( ($i+1) < count($data) && $data[$i+1][0] == " ") {
+
+				$d = preg_replace('/\s+/', ' ', $d) . trim($data[$i+1]);
+				$i++;
+			}
 
 			$d = trim(preg_replace('/\s+/', ' ', $d));
 
@@ -72,7 +84,6 @@ class Location {
                         if (strpos($d, 'DESCRIPTION:') !== false) {
 				$d = splitString($d, ':');
 				$note_splitted = explode("\\n", $d);
-
 				foreach($note_splitted as $c) {
 		                        if (strpos($c, 'GPS:') !== false) {
 		                                $gps = splitString($c, ':');
@@ -82,6 +93,12 @@ class Location {
 						$this->gps['lat'] = $gps_a[0];
 						$this->gps['lon'] = $gps_a[1];
                         		} else {
+
+						preg_match($re, $c, $matches);
+
+						if (count($matches) > 0) {
+							$c = "<a href=\'$matches[0]\' target=\'_blank\'>$c</a>";
+						}
 						$this->note .= $c."</br>";
 					}
 				}
@@ -109,14 +126,10 @@ class Location {
 	public function printJS() {
 
 		if (count($this->childs) == 0 && count($this->gps) > 0) {
-			echo 'var contentString = \'<div id="content"><div id="siteNotice"></div><h3>'.$this->name.'</h3><div id="bodyContent"><p>'.$this->note.'</p></div></div>\';';
-			echo "var infowindow".$this->UID." = new google.maps.InfoWindow({ content: contentString });\n";
-			echo "var marker".$this->UID." = new google.maps.Marker({position: { lat: ".$this->gps['lat'].", lng: ".$this->gps['lon']." }, map: map, title: '".str_replace("'", "\\'", $this->name)."'});\n";
-			echo "marker".$this->UID.".addListener('click', function() { infowindow".$this->UID.".open(map, marker".$this->UID.");});\n";
+			echo 'var contentString = \'<div id="content"><div id="siteNotice"></div><h3>'.$this->name.'</h3><div id="bodyContent"><p>'.$this->note.'</p></div></div>\';'."\n";
+			echo "createMarker(map, '".str_replace("'", "\\'", $this->name)."', { lat: ".$this->gps['lat'].", lng: ".$this->gps['lon']." }, contentString);";
 		}
-
 	}
-
 }
 
 $db = new PDO("mysql:host=$server;dbname=$db_name;charset=utf8mb4", $userMysql, $userPass);
@@ -149,13 +162,35 @@ foreach ($locations as $l) {
                         $parents[$l->parent]->childs[] = $l;
                 }
         }
-
 }
 
+?>
 
-echo "<script> $(document).ready(function() {";
+<script> 
 
-echo "var map = new google.maps.Map(document.getElementById('map-canvas'), {center: new google.maps.LatLng(25.272242254906,51.610719209717), zoom: 2});";
+var infowindow;
+
+function createMarker(map, title, latlng, content) {
+    var marker = new google.maps.Marker({
+        position: latlng,
+        map: map,
+	title: title
+    });
+    google.maps.event.addListener(marker, "click", function() {
+        if (infowindow) infowindow.close();
+        infowindow = new google.maps.InfoWindow({
+            content: content
+        });
+        infowindow.open(map, marker);
+    });
+    return marker;
+}
+
+$(document).ready(function() {
+
+var map = new google.maps.Map(document.getElementById('map-canvas'), {center: new google.maps.LatLng(25.272242254906,51.610719209717), zoom: 2});
+
+<?php
 
 foreach($locations as $l) {
 	$l->printJS();
