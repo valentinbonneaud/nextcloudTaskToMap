@@ -16,7 +16,7 @@ include_once("connect.php");
 			body { height: 100%; margin: 0; padding: 0 }
 			#map-canvas { width: 100%; } 
 		</style>
-		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing&key=AIzaSyCxyaIp1mOe-MnCtZbtj2AyApHj6hoUJWM&sensor=true"></script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing&key=<?=$API_KEY_MAPS?>&sensor=true"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	   
 		<!-- Latest compiled and minified CSS -->
