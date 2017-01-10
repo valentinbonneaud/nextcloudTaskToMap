@@ -97,7 +97,7 @@ class Location {
 						preg_match($re, $c, $matches);
 
 						if (count($matches) > 0) {
-							$new = "<a href=\'$matches[1]\' target=\'_blank\'>$matches[1]</a>";
+							$new = "<a href='$matches[1]' target='_blank'>$matches[1]</a>";
 							$c = str_replace($matches[1], $new, $c);
 						}
 						$this->note .= $c."</br>";
@@ -124,11 +124,28 @@ class Location {
 		
 	}
 
+	public function getName($escape=TRUE) {
+		if ($escape) {
+			return str_replace("'", "\\'", $this->name);
+		}
+
+		return $this->name;
+	}
+
+        public function getNote($escape=TRUE) {
+                if ($escape) {
+                        return str_replace("'", "\\'", $this->note);
+                }
+
+                return $this->note;
+        }
+
+
 	public function printJS() {
 
 		if (count($this->childs) == 0 && count($this->gps) > 0) {
-			echo 'var contentString = \'<div id="content"><div id="siteNotice"></div><h3>'.$this->name.'</h3><div id="bodyContent"><p>'.$this->note.'</p></div></div>\';'."\n";
-			echo "createMarker(map, '".str_replace("'", "\\'", $this->name)."', { lat: ".$this->gps['lat'].", lng: ".$this->gps['lon']." }, contentString);";
+			echo 'var contentString = \'<div id="content"><div id="siteNotice"></div><h3>'.$this->getName().'</h3><div id="bodyContent"><p>'.$this->getNote().'</p></div></div>\';'."\n";
+			echo "createMarker(map, '".$this->getName()."', { lat: ".$this->gps['lat'].", lng: ".$this->gps['lon']." }, contentString);";
 		}
 	}
 }
@@ -213,10 +230,10 @@ echo "}); </script>";
 
 <?php
 foreach($parents as $p) {
-        echo "- $p->name</br>";
+        echo "- ".$p->getName(FALSE)."</br>";
 
         foreach($p->childs as $c) {
-                echo "<div style='padding: 0px 15px;'>- $c->name</div>";
+                echo "<div style='padding: 0px 15px;'>- ".$c->getName(FALSE)."</div>";
         }
 
         echo "</br>";
