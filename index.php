@@ -145,7 +145,7 @@ class Location {
 
 		if (count($this->childs) == 0 && count($this->gps) > 0) {
 			echo 'var contentString = \'<div id="content"><div id="siteNotice"></div><h2>'.$this->getName().'</h3><div id="bodyContent"><p>'.$this->getNote().'</p><p><a href="https://duckduckgo.com/?q=\'+encodeURIComponent("'.$this->getName().'")+\'" target="_blank">Search '.$this->getName().'</a></p></div></div>\';'."\n";
-			echo "createMarker(map, '<a href=\'https://duckduckgo.com/?q='+encodeURIComponent('".$this->getName()."')+'\' target=\'_blank\'>".$this->getName()."</a>', { lat: ".$this->gps['lat'].", lng: ".$this->gps['lon']." }, contentString);";
+			echo "createMarker(map, '".$this->getName()."', { lat: ".$this->gps['lat'].", lng: ".$this->gps['lon']." }, contentString);";
 		}
 	}
 }
